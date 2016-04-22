@@ -18,6 +18,24 @@ public class ViewFieldController {
 	@FXML
 	private Canvas regularCanvas;
 
+	private float width;
+
+	private float height;
+
+	private float radius;
+
+	private float centerOffsetX;
+
+	private float centerOffsetY;
+
+	private float objectDiameter;
+
+	private float objectRadius;
+
+	private float objectSizeFactor;
+
+	private float axisSizeFactor;
+
 	@FXML
 	private void initialize() {
 
@@ -27,10 +45,15 @@ public class ViewFieldController {
 		ReadOnlyDoubleProperty heightProperty = pane.heightProperty();
 		regularCanvas.widthProperty().bind(widthProperty);
 		regularCanvas.heightProperty().bind(heightProperty);
-		regularCanvas.widthProperty().addListener((obs, oldWidth, newWidth) -> draw(gc));
-		regularCanvas.heightProperty().addListener((obs, oldHeight, newHeight) -> draw(gc));
+		regularCanvas.widthProperty().addListener((obs, oldWidth, newWidth) -> {
+			refreshValues();
+			draw(gc);
+		});
+		regularCanvas.heightProperty().addListener((obs, oldHeight, newHeight) -> {
+			refreshValues();
+			draw(gc);
+		});
 
-		draw(gc);
 	}
 
 	public void setDialogStage(Stage dialogStage) {
@@ -42,9 +65,14 @@ public class ViewFieldController {
 		drawArea(gc);
 		deawAxis(gc);
 
-		drawCircle(gc);
-		drawRectangle(gc);
-		drawTriangle(gc);
+		Shape s1 = Shape.CIRCLE;
+		s1.draw(gc, centerOffsetX, centerOffsetY, objectRadius, objectDiameter);
+
+		Shape s2 = Shape.SQUARE;
+		s2.draw(gc, centerOffsetX, centerOffsetY, objectRadius, objectDiameter);
+
+		Shape s3 = Shape.TRIANGLE;
+		s3.draw(gc, centerOffsetX, centerOffsetY, objectRadius, objectDiameter);
 	}
 
 	private void drawArea(GraphicsContext gc) {
@@ -60,88 +88,31 @@ public class ViewFieldController {
 
 		gc.setStroke(Color.BLACK);
 
-		float axisOffsetX = (float) (regularCanvas.getWidth() / 2.0);
-		float axisOffsetY = (float) (regularCanvas.getHeight() / 2.0);
+		float X1 = -centerOffsetX * axisSizeFactor + centerOffsetX;
+		float X2 = centerOffsetX * axisSizeFactor + centerOffsetX;
+		float Y1 = 0 * axisSizeFactor + centerOffsetY;
+		float Y2 = 0 * axisSizeFactor + centerOffsetY;
 
-		float sizeFactor = 0.5f;
-
-		float X1 = -axisOffsetX * sizeFactor + axisOffsetX;
-		float X2 = axisOffsetX * sizeFactor + axisOffsetX;
-		float Y1 = 0 * sizeFactor + axisOffsetY;
-		float Y2 = 0 * sizeFactor + axisOffsetY;
-
-		float X3 = 0 * sizeFactor + axisOffsetX;
-		float X4 = 0 * sizeFactor + axisOffsetX;
-		float Y3 = -axisOffsetY * sizeFactor + axisOffsetY;
-		float Y4 = axisOffsetY * sizeFactor + axisOffsetY;
+		float X3 = 0 * axisSizeFactor + centerOffsetX;
+		float X4 = 0 * axisSizeFactor + centerOffsetX;
+		float Y3 = -centerOffsetY * axisSizeFactor + centerOffsetY;
+		float Y4 = centerOffsetY * axisSizeFactor + centerOffsetY;
 
 		gc.strokeLine(X1, Y1, X2, Y2);
 		gc.strokeLine(X3, Y3, X4, Y4);
 	}
 
-	private void drawCircle(GraphicsContext gc) {
+	private void refreshValues() {
 
-		gc.setStroke(Color.BLACK);
-
-		float sizeFactor = 0.2f;
-
-		float width = (float) regularCanvas.getWidth();
-		float height = (float) regularCanvas.getHeight();
-		float Radius = Math.min(width, height);
-
-		float centerOffsetX = width / 2.0f;
-		float centerOffsetY = height / 2.0f;
-
-		float actualDiameter = sizeFactor * Radius;
-		float actualRadius = (float) (sizeFactor * Radius / 2.0);
-
-		gc.strokeOval(centerOffsetX - actualRadius, centerOffsetY - actualRadius, actualDiameter, actualDiameter);
-	}
-
-	private void drawRectangle(GraphicsContext gc) {
-
-		gc.setStroke(Color.BLACK);
-
-		float sizeFactor = 0.2f;
-
-		float width = (float) regularCanvas.getWidth();
-		float height = (float) regularCanvas.getHeight();
-		float Radius = Math.min(width, height);
-
-		float centerOffsetX = width / 2.0f;
-		float centerOffsetY = height / 2.0f;
-
-		float actualDiameter = sizeFactor * Radius;
-		float actualRadius = (float) (sizeFactor * Radius / 2.0);
-
-		gc.strokeRect(centerOffsetX - actualRadius, centerOffsetY - actualRadius, actualDiameter, actualDiameter);
-	}
-
-	private void drawTriangle(GraphicsContext gc) {
-
-		gc.setStroke(Color.BLACK);
-
-		float sizeFactor = 0.2f;
-
-		float width = (float) regularCanvas.getWidth();
-		float height = (float) regularCanvas.getHeight();
-		float Radius = Math.min(width, height);
-
-		float centerOffsetX = width / 2.0f;
-		float centerOffsetY = height / 2.0f;
-
-		float actualDiameter = sizeFactor * Radius;
-		float actualRadius = (float) (sizeFactor * Radius / 2.0);
-
-		float X1 = centerOffsetX;
-		float X2 = centerOffsetX + actualRadius;
-		float X3 = centerOffsetX - actualRadius;
-		float Y1 = centerOffsetY - actualRadius;
-		float Y2 = centerOffsetY + actualRadius;
-		float Y3 = centerOffsetY + actualRadius;
-
-		gc.strokePolygon(new double[] { X1, X2, X3 }, new double[] { Y1, Y2, Y3 }, 3);
-
+		width = (float) regularCanvas.getWidth();
+		height = (float) regularCanvas.getHeight();
+		centerOffsetX = width / 2.0f;
+		centerOffsetY = height / 2.0f;
+		radius = Math.min(width, height);
+		objectDiameter = objectSizeFactor * radius;
+		objectRadius = (float) (objectSizeFactor * radius / 2.0);
+		objectSizeFactor = 0.2f;
+		axisSizeFactor = 0.5f;
 	}
 
 }
