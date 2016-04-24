@@ -5,7 +5,7 @@ import javafx.scene.paint.Color;
 
 public enum Shape {
 
-	NONE, SQUARE, CIRCLE, TRIANGLE;
+	SQUARE, CIRCLE, TRIANGLE;
 
 	public void draw(GraphicsContext gc, float centerOffsetX, float centerOffsetY, float objectRadius,
 			float objectDiameter) {

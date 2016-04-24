@@ -20,6 +20,7 @@ public class MainApp extends Application {
 	private SettingsOverviewController settingsOverviewController;
 	private ViewFieldController viewFieldController;
 	private ViewFieldSettings viewFieldSettings;
+	private boolean isViewFieldWindowOpened = false;
 
 	public MainApp() {
 	}
@@ -82,30 +83,33 @@ public class MainApp extends Application {
 	}
 
 	public void showViewField() {
-		try {
-			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(MainApp.class.getResource("view/ViewField.fxml"));
-			StackPane pane = (StackPane) loader.load();
 
-			Stage stage = new Stage();
-			stage.setTitle("View Field");
-			Scene scene = new Scene(pane);
-			stage.setScene(scene);
+		if (isViewFieldWindowOpened || !settingsOverviewController.isReady())
+			return;
+		else
+			try {
+				FXMLLoader loader = new FXMLLoader();
+				loader.setLocation(MainApp.class.getResource("view/ViewField.fxml"));
+				StackPane pane = (StackPane) loader.load();
 
-			viewFieldController = loader.getController();
-			viewFieldController.setMainApp(this);
-			viewFieldController.setDialogStage(stage);
+				Stage stage = new Stage();
+				stage.setTitle("View Field");
+				Scene scene = new Scene(pane);
+				stage.setScene(scene);
+				stage.setOnCloseRequest((e) -> {
+					isViewFieldWindowOpened = false;
+				});
 
-			stage.show();
+				viewFieldController = loader.getController();
+				viewFieldController.setMainApp(this);
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+				stage.initOwner(primaryStage);
+				stage.show();
+				isViewFieldWindowOpened = true;
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 	}
 
 }
-
-// stage.initModality(Modality.APPLICATION_MODAL);
-// stage.initOwner(primaryStage);
-// controller.setPerson(person);
-// stage.showAndWait();

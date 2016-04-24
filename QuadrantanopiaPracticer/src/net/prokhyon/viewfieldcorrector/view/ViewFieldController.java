@@ -6,16 +6,10 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import net.prokhyon.viewfieldcorrector.MainApp;
 import net.prokhyon.viewfieldcorrector.model.ViewFieldSettings;
 
 public class ViewFieldController {
-
-	private MainApp mainApp;
-
-	private Stage dialogStage;
 
 	private ViewFieldSettings viewFieldSettings;
 
@@ -64,10 +58,9 @@ public class ViewFieldController {
 	}
 
 	public void setMainApp(MainApp mainApp) {
-		this.mainApp = mainApp;
 		this.viewFieldSettings = mainApp.getViewFieldSettings();
 
-		ChangeListener<? super Number> listener = (obs, oldWidth, newWidth) -> {
+		ChangeListener<? super Object> listener = (obs, oldWidth, newWidth) -> {
 			refreshValues();
 			draw(regularCanvas.getGraphicsContext2D());
 		};
@@ -78,16 +71,18 @@ public class ViewFieldController {
 		viewFieldSettings.centerAxisOffsetYProperty().addListener(listener);
 		viewFieldSettings.obectStartingPositionXProperty().addListener(listener);
 		viewFieldSettings.obectStartingPositionYProperty().addListener(listener);
-	}
+		viewFieldSettings.objectStartingRadiusProperty().addListener(listener);
 
-	public void setDialogStage(Stage dialogStage) {
-		this.dialogStage = dialogStage;
+		viewFieldSettings.activeBackgroundColorProperty().addListener(listener);
+		viewFieldSettings.passiveBackgroundColorProperty().addListener(listener);
+		viewFieldSettings.axisColorProperty().addListener(listener);
+		viewFieldSettings.startingFieldColorProperty().addListener(listener);
 	}
 
 	private void draw(GraphicsContext gc) {
 
 		clearArea(gc);
-		// drawArea(gc);
+		drawStartingArea(gc);
 		drawAxis(gc);
 
 		float objectOffsetX = width * viewFieldSettings.getObectStartingPositionX() / 100.0f;
@@ -103,37 +98,43 @@ public class ViewFieldController {
 		s3.draw(gc, centerPointX + objectOffsetX, centerPointY + objectOffsetY, objectRadius, objectDiameter);
 	}
 
-	private void drawArea(GraphicsContext gc) {
-
-		gc.setStroke(Color.BLACK);
-		gc.setLineWidth(1);
-		gc.strokeLine(0, 0, regularCanvas.getWidth(), regularCanvas.getHeight());
-		gc.strokeLine(0, regularCanvas.getHeight(), regularCanvas.getWidth(), 0);
-	}
-
 	private void clearArea(GraphicsContext gc) {
+
+		gc.setFill(viewFieldSettings.getActiveBackgroundColor());
 		gc.clearRect(0, 0, regularCanvas.getWidth(), regularCanvas.getHeight());
+		gc.fillRect(0, 0, regularCanvas.getWidth(), regularCanvas.getHeight());
 	}
 
 	private void drawAxis(GraphicsContext gc) {
 
-		gc.setStroke(Color.BLACK);
+		gc.setStroke(viewFieldSettings.getAxisColor());
 
 		float axisOffsetX = width * viewFieldSettings.getCenterAxisOffsetX() / 100.0f;
 		float axisOffsetY = height * viewFieldSettings.getCenterAxisOffsetY() / 100.0f;
 
-		float X1 = -centerPointX * axisSizeFactor + centerPointX + axisOffsetX;
-		float X2 = centerPointX * axisSizeFactor + centerPointX + axisOffsetX;
+		float X1 = -screenSizeMin * axisSizeFactor + centerPointX + axisOffsetX;
+		float X2 = screenSizeMin * axisSizeFactor + centerPointX + axisOffsetX;
 		float Y1 = centerPointY + axisOffsetY;
 		float Y2 = centerPointY + axisOffsetY;
 
 		float X3 = centerPointX + axisOffsetX;
 		float X4 = centerPointX + axisOffsetX;
-		float Y3 = -centerPointY * axisSizeFactor + centerPointY + axisOffsetY;
-		float Y4 = centerPointY * axisSizeFactor + centerPointY + axisOffsetY;
+		float Y3 = -screenSizeMin * axisSizeFactor + centerPointY + axisOffsetY;
+		float Y4 = screenSizeMin * axisSizeFactor + centerPointY + axisOffsetY;
 
 		gc.strokeLine(X1, Y1, X2, Y2);
 		gc.strokeLine(X3, Y3, X4, Y4);
+	}
+
+	private void drawStartingArea(GraphicsContext gc) {
+
+		float dx = width * viewFieldSettings.getObectStartingPositionX() / 100.0f;
+		float dy = height * viewFieldSettings.getObectStartingPositionY() / 100.0f;
+		float dw = screenSizeMin * viewFieldSettings.getObjectStartingRadius() / 100.0f;
+		float dh = screenSizeMin * viewFieldSettings.getObjectStartingRadius() / 100.0f;
+
+		gc.setFill(viewFieldSettings.getStartingFieldColor());
+		gc.fillOval(centerPointX + dx - dw / 2.0, centerPointY + dy - dh / 2.0, dw, dh);
 	}
 
 	private void refreshValues() {
