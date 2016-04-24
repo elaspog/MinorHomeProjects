@@ -17,18 +17,15 @@ public class MainApp extends Application {
 
 	private Stage primaryStage;
 	private BorderPane rootLayout;
-
+	private SettingsOverviewController settingsOverviewController;
+	private ViewFieldController viewFieldController;
 	private ViewFieldSettings viewFieldSettings;
 
-	public ViewFieldSettings getViewFieldSettings() {
-		return viewFieldSettings;
-	}
-
-	public void setViewFieldSettings(ViewFieldSettings viewFieldSettings) {
-		this.viewFieldSettings = viewFieldSettings;
-	}
-
 	public MainApp() {
+	}
+
+	public static void main(String[] args) {
+		launch(args);
 	}
 
 	@Override
@@ -41,17 +38,28 @@ public class MainApp extends Application {
 		showSettingsOverview();
 	}
 
+	public Stage getPrimaryStage() {
+		return primaryStage;
+	}
+
+	public ViewFieldSettings getViewFieldSettings() {
+
+		if (viewFieldSettings == null)
+			viewFieldSettings = new ViewFieldSettings();
+
+		return viewFieldSettings;
+	}
+
 	public void initRootLayout() {
 		try {
-			// Load root layout from fxml file.
 			FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(MainApp.class.getResource("view/RootLayout.fxml"));
 			rootLayout = (BorderPane) loader.load();
 
-			// Show the scene containing the root layout.
 			Scene scene = new Scene(rootLayout);
 			primaryStage.setScene(scene);
 			primaryStage.show();
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -65,20 +73,12 @@ public class MainApp extends Application {
 
 			rootLayout.setCenter(settingsOverview);
 
-			SettingsOverviewController controller = loader.getController();
-			controller.setMainApp(this);
+			settingsOverviewController = loader.getController();
+			settingsOverviewController.setMainApp(this);
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public Stage getPrimaryStage() {
-		return primaryStage;
-	}
-
-	public static void main(String[] args) {
-		launch(args);
 	}
 
 	public void showViewField() {
@@ -92,8 +92,9 @@ public class MainApp extends Application {
 			Scene scene = new Scene(pane);
 			stage.setScene(scene);
 
-			ViewFieldController controller = loader.getController();
-			controller.setDialogStage(stage);
+			viewFieldController = loader.getController();
+			viewFieldController.setMainApp(this);
+			viewFieldController.setDialogStage(stage);
 
 			stage.show();
 

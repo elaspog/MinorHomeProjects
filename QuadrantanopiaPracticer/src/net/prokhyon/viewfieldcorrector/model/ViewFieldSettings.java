@@ -17,7 +17,7 @@ public class ViewFieldSettings {
 	private final IntegerProperty animationSpeed;
 
 	public ViewFieldSettings() {
-		this(500, 500, 0, 0, 250, 250, 50, 50, 50, 50);
+		this(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 
 	public ViewFieldSettings(int resolutionWidth, int resolutionHeight, int centerAxisOffsetX, int centerAxisOffsetY,
