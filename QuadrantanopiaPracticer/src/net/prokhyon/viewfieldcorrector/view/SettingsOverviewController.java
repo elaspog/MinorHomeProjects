@@ -113,6 +113,7 @@ public class SettingsOverviewController {
 		viewFieldSettings.obectStartingPositionXProperty().bind(obectStartingPositionX.valueProperty());
 		viewFieldSettings.obectStartingPositionYProperty().bind(obectStartingPositionY.valueProperty());
 		viewFieldSettings.objectStartingDiameterProperty().bind(objectStartingDiameter.valueProperty());
+		viewFieldSettings.animationSpeedProperty().bind(speed.valueProperty());
 
 		viewFieldSettings.activeBackgroundColorProperty().bind(activeBackgroundColor.valueProperty());
 		viewFieldSettings.passiveBackgroundColorProperty().bind(passiveBackgroundColor.valueProperty());
@@ -131,6 +132,7 @@ public class SettingsOverviewController {
 	@FXML
 	private void handleStopAnimation() {
 
+		mainApp.stopAnimation();
 	}
 
 	@FXML

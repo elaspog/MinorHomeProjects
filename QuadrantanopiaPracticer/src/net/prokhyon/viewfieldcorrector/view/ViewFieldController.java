@@ -2,6 +2,9 @@ package net.prokhyon.viewfieldcorrector.view;
 
 import java.util.Random;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleFloatProperty;
@@ -10,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
+import javafx.util.Duration;
 import net.prokhyon.viewfieldcorrector.MainApp;
 import net.prokhyon.viewfieldcorrector.model.ViewFieldSettings;
 
@@ -50,6 +54,10 @@ public class ViewFieldController {
 	private float objectSizeFactor;
 
 	private float axisSizeFactor;
+
+	private float axisOffsetX;
+
+	private float axisOffsetY;
 
 	public float getObjectActualPositionX() {
 		return objectActualPositionX.get();
@@ -144,9 +152,6 @@ public class ViewFieldController {
 
 		gc.setStroke(viewFieldSettings.getAxisColor());
 
-		float axisOffsetX = width * viewFieldSettings.getCenterAxisOffsetX() / 100.0f;
-		float axisOffsetY = height * viewFieldSettings.getCenterAxisOffsetY() / 100.0f;
-
 		float X1 = -screenSizeMin * axisSizeFactor + centerPointX + axisOffsetX;
 		float X2 = screenSizeMin * axisSizeFactor + centerPointX + axisOffsetX;
 		float Y1 = centerPointY + axisOffsetY;
@@ -179,38 +184,78 @@ public class ViewFieldController {
 		generateNewCoordinates();
 	}
 
+	boolean isAnimating = false;
+
+	public void startShapeAnimation() {
+
+		float d = calculateDistance(axisOffsetX, objectActualPositionX.get(), axisOffsetY, objectActualPositionY.get());
+		float speed = viewFieldSettings.getAnimationSpeed() / 100f;
+		float time = (d / screenSizeMin) / speed;
+
+		if (!isAnimating) {
+
+			isAnimating = true;
+
+			Timeline timeline = new Timeline(
+					new KeyFrame(Duration.seconds(0), new KeyValue(objectActualPositionX, objectActualPositionX.get()),
+							new KeyValue(objectActualPositionX, objectActualPositionX.get())),
+					new KeyFrame(Duration.seconds(time), new KeyValue(objectActualPositionX, axisOffsetX),
+							new KeyValue(objectActualPositionY, axisOffsetY)));
+
+			timeline.setOnFinished((x) -> {
+				isAnimating = false;
+			});
+
+			timeline.play();
+		}
+	}
+
 	private void generateNewColor() {
 
-		shapeColorCode = viewFieldSettings.getObjectColorCodes()
-				.get(random.nextInt(viewFieldSettings.getObjectColorCodes().size()));
+		if (!isAnimating) {
+			shapeColorCode = viewFieldSettings.getObjectColorCodes()
+					.get(random.nextInt(viewFieldSettings.getObjectColorCodes().size()));
+		}
 	}
 
 	private void generateNextShape() {
 
-		shape = Shape.values()[random.nextInt(Shape.values().length)];
+		if (!isAnimating) {
+			shape = Shape.values()[random.nextInt(Shape.values().length)];
+		}
 	}
 
 	private void generateNewCoordinates() {
 
-		float spX = width * viewFieldSettings.getObectStartingPositionX() / 100.0f;
-		float spY = height * viewFieldSettings.getObectStartingPositionY() / 100.0f;
-		float r = screenSizeMin * viewFieldSettings.getObjectStartingDiameter() / 200.0f;
+		if (!isAnimating) {
+			float spX = width * viewFieldSettings.getObectStartingPositionX() / 100.0f;
+			float spY = height * viewFieldSettings.getObectStartingPositionY() / 100.0f;
+			float r = screenSizeMin * viewFieldSettings.getObjectStartingDiameter() / 200.0f;
 
-		while (true) {
+			while (true) {
 
-			float genXfloat = random.nextFloat() * 2;
-			float genYfloat = random.nextFloat() * 2;
-			float generatedX = spX + genXfloat * r - r;
-			float generatedY = spY + genYfloat * r - r;
+				float genXfloat = random.nextFloat() * 2;
+				float genYfloat = random.nextFloat() * 2;
+				float generatedX = spX + genXfloat * r - r;
+				float generatedY = spY + genYfloat * r - r;
 
-			double dist = Math.sqrt((spX - generatedX) * (spX - generatedX) + (spY - generatedY) * (spY - generatedY));
+				double dist = Math
+						.sqrt((spX - generatedX) * (spX - generatedX) + (spY - generatedY) * (spY - generatedY));
 
-			if (dist <= r) {
-				objectActualPositionX.set(generatedX);
-				objectActualPositionY.set(generatedY);
-				break;
+				if (dist <= r) {
+					objectActualPositionX.set(generatedX);
+					objectActualPositionY.set(generatedY);
+					break;
+				}
 			}
 		}
+	}
+
+	private float calculateDistance(float x1, float x2, float y1, float y2) {
+
+		float dx = x1 - x2;
+		float dy = y1 - y2;
+		return (float) Math.sqrt(dx * dx + dy * dy);
 	}
 
 	private void refreshValues() {
@@ -224,5 +269,7 @@ public class ViewFieldController {
 		screenSizeMin = Math.min(width, height);
 		objectDiameter = objectSizeFactor * screenSizeMin;
 		objectRadius = (float) (objectDiameter / 2.0);
+		axisOffsetX = width * viewFieldSettings.getCenterAxisOffsetX() / 100.0f;
+		axisOffsetY = height * viewFieldSettings.getCenterAxisOffsetY() / 100.0f;
 	}
 }

@@ -119,4 +119,10 @@ public class MainApp extends Application {
 		}
 	}
 
+	public void stopAnimation() {
+
+		if (isViewFieldWindowOpened && viewFieldController != null) {
+			viewFieldController.startShapeAnimation();
+		}
+	}
 }
