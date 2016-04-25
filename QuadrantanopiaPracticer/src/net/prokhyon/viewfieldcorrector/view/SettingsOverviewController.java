@@ -124,18 +124,6 @@ public class SettingsOverviewController {
 	}
 
 	@FXML
-	private void handleStartAnimation() {
-
-		mainApp.startAnimation();
-	}
-
-	@FXML
-	private void handleStopAnimation() {
-
-		mainApp.stopAnimation();
-	}
-
-	@FXML
 	private void handleAddObjectColor() {
 
 		Color suggestedColor = objectColorTmp.getValue();

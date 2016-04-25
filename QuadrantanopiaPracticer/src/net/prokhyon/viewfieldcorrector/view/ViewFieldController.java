@@ -83,6 +83,11 @@ public class ViewFieldController {
 		return objectActualPositionY;
 	}
 
+	ChangeListener<? super Object> listener = (obs, oldWidth, newWidth) -> {
+		refreshValues();
+		draw(regularCanvas.getGraphicsContext2D());
+	};
+
 	@FXML
 	private void initialize() {
 
@@ -92,24 +97,12 @@ public class ViewFieldController {
 		ReadOnlyDoubleProperty heightProperty = pane.heightProperty();
 		regularCanvas.widthProperty().bind(widthProperty);
 		regularCanvas.heightProperty().bind(heightProperty);
-		regularCanvas.widthProperty().addListener((obs, oldWidth, newWidth) -> {
-			refreshValues();
-			draw(gc);
-		});
-		regularCanvas.heightProperty().addListener((obs, oldHeight, newHeight) -> {
-			refreshValues();
-			draw(gc);
-		});
-
+		regularCanvas.widthProperty().addListener(listener);
+		regularCanvas.heightProperty().addListener(listener);
 	}
 
 	public void setMainApp(MainApp mainApp) {
 		this.viewFieldSettings = mainApp.getViewFieldSettings();
-
-		ChangeListener<? super Object> listener = (obs, oldWidth, newWidth) -> {
-			refreshValues();
-			draw(regularCanvas.getGraphicsContext2D());
-		};
 
 		viewFieldSettings.objectSizeProperty().addListener(listener);
 		viewFieldSettings.axisSizeProperty().addListener(listener);
@@ -127,7 +120,9 @@ public class ViewFieldController {
 		objectActualPositionXProperty().addListener(listener);
 		objectActualPositionYProperty().addListener(listener);
 
-		generateNewObject();
+		generateNewColor();
+		generateNextShape();
+		generateNewCoordinates();
 	}
 
 	private void draw(GraphicsContext gc) {
@@ -177,16 +172,9 @@ public class ViewFieldController {
 		gc.fillOval(centerPointX + dx - dw / 2.0, centerPointY + dy - dh / 2.0, dw, dh);
 	}
 
-	public void generateNewObject() {
-
-		generateNewColor();
-		generateNextShape();
-		generateNewCoordinates();
-	}
-
 	boolean isAnimating = false;
 
-	public void startShapeAnimation() {
+	private void startShapeAnimation() {
 
 		float d = calculateDistance(axisOffsetX, objectActualPositionX.get(), axisOffsetY, objectActualPositionY.get());
 		float speed = viewFieldSettings.getAnimationSpeed() / 100f;
@@ -271,5 +259,13 @@ public class ViewFieldController {
 		objectRadius = (float) (objectDiameter / 2.0);
 		axisOffsetX = width * viewFieldSettings.getCenterAxisOffsetX() / 100.0f;
 		axisOffsetY = height * viewFieldSettings.getCenterAxisOffsetY() / 100.0f;
+	}
+
+	public void playAnimation() {
+
+		generateNewColor();
+		generateNextShape();
+		generateNewCoordinates();
+		startShapeAnimation();
 	}
 }

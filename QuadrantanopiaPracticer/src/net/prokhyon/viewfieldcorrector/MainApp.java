@@ -5,6 +5,7 @@ import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
@@ -95,6 +96,11 @@ public class MainApp extends Application {
 				Stage stage = new Stage();
 				stage.setTitle("View Field");
 				Scene scene = new Scene(pane);
+
+				scene.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
+					viewFieldController.playAnimation();
+				});
+
 				stage.setScene(scene);
 				stage.setOnCloseRequest((e) -> {
 					isViewFieldWindowOpened = false;
@@ -112,17 +118,4 @@ public class MainApp extends Application {
 			}
 	}
 
-	public void startAnimation() {
-
-		if (isViewFieldWindowOpened && viewFieldController != null) {
-			viewFieldController.generateNewObject();
-		}
-	}
-
-	public void stopAnimation() {
-
-		if (isViewFieldWindowOpened && viewFieldController != null) {
-			viewFieldController.startShapeAnimation();
-		}
-	}
 }
