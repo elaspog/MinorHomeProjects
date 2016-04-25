@@ -112,4 +112,11 @@ public class MainApp extends Application {
 			}
 	}
 
+	public void startAnimation() {
+
+		if (isViewFieldWindowOpened && viewFieldController != null) {
+			viewFieldController.generateNewObject();
+		}
+	}
+
 }

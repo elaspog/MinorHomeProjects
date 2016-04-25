@@ -1,5 +1,8 @@
 package net.prokhyon.viewfieldcorrector.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -14,12 +17,13 @@ public class ViewFieldSettings {
 	private final IntegerProperty obectStartingPositionY;
 	private final IntegerProperty objectSize;
 	private final IntegerProperty axisSize;
-	private final IntegerProperty objectStartingRadius;
+	private final IntegerProperty objectStartingDiameter;
 	private final IntegerProperty animationSpeed;
 	private final ObjectProperty<Color> activeBackgroundColor;
 	private final ObjectProperty<Color> passiveBackgroundColor;
 	private final ObjectProperty<Color> axisColor;
 	private final ObjectProperty<Color> startingFieldColor;
+	private final List<String> objectColorsCodes;
 
 	public ViewFieldSettings() {
 		this(0, 0, 0, 0, 0, 0, 0, 0, null, null, null, null);
@@ -35,12 +39,13 @@ public class ViewFieldSettings {
 		this.obectStartingPositionY = new SimpleIntegerProperty(obectStartingPositionY);
 		this.objectSize = new SimpleIntegerProperty(objectSize);
 		this.axisSize = new SimpleIntegerProperty(axisSize);
-		this.objectStartingRadius = new SimpleIntegerProperty(objectStartingRadius);
+		this.objectStartingDiameter = new SimpleIntegerProperty(objectStartingRadius);
 		this.animationSpeed = new SimpleIntegerProperty(animationSpeed);
 		this.activeBackgroundColor = new SimpleObjectProperty<Color>(activeBackgroundColor);
 		this.passiveBackgroundColor = new SimpleObjectProperty<Color>(passiveBackgroundColor);
 		this.axisColor = new SimpleObjectProperty<Color>(axisColor);
 		this.startingFieldColor = new SimpleObjectProperty<Color>(startingFieldColor);
+		this.objectColorsCodes = new ArrayList<String>();
 	}
 
 	public int getCenterAxisOffsetX() {
@@ -115,16 +120,16 @@ public class ViewFieldSettings {
 		return axisSize;
 	}
 
-	public int getObjectStartingRadius() {
-		return objectStartingRadius.get();
+	public int getObjectStartingDiameter() {
+		return objectStartingDiameter.get();
 	}
 
-	public void setObjectStartingRadius(int objectStartingRadius) {
-		this.objectStartingRadius.set(objectStartingRadius);
+	public void setObjectStartingDiameter(int objectStartingDiameter) {
+		this.objectStartingDiameter.set(objectStartingDiameter);
 	}
 
-	public IntegerProperty objectStartingRadiusProperty() {
-		return objectStartingRadius;
+	public IntegerProperty objectStartingDiameterProperty() {
+		return objectStartingDiameter;
 	}
 
 	public int getAnimationSpeed() {
@@ -186,4 +191,9 @@ public class ViewFieldSettings {
 	public ObjectProperty<Color> startingFieldColorProperty() {
 		return startingFieldColor;
 	}
+
+	public List<String> getObjectColorCodes() {
+		return objectColorsCodes;
+	}
+
 }

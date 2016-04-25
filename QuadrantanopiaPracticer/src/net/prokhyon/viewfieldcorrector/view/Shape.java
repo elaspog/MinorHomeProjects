@@ -8,7 +8,10 @@ public enum Shape {
 	SQUARE, CIRCLE, TRIANGLE;
 
 	public void draw(GraphicsContext gc, float centerOffsetX, float centerOffsetY, float objectRadius,
-			float objectDiameter) {
+			float objectDiameter, String shapeColorCode) {
+
+		Color web = Color.web(shapeColorCode);
+		gc.setFill(web);
 
 		switch (this) {
 
@@ -32,21 +35,18 @@ public enum Shape {
 	private void drawCircle(GraphicsContext gc, float centerOffsetX, float centerOffsetY, float objectRadius,
 			float objectDiameter) {
 
-		gc.setStroke(Color.BLACK);
-		gc.strokeOval(centerOffsetX - objectRadius, centerOffsetY - objectRadius, objectDiameter, objectDiameter);
+		gc.fillOval(centerOffsetX - objectRadius, centerOffsetY - objectRadius, objectDiameter, objectDiameter);
+
 	}
 
 	private void drawRectangle(GraphicsContext gc, float centerOffsetX, float centerOffsetY, float objectRadius,
 			float objectDiameter) {
 
-		gc.setStroke(Color.BLACK);
-		gc.strokeRect(centerOffsetX - objectRadius, centerOffsetY - objectRadius, objectDiameter, objectDiameter);
+		gc.fillRect(centerOffsetX - objectRadius, centerOffsetY - objectRadius, objectDiameter, objectDiameter);
 	}
 
 	private void drawTriangle(GraphicsContext gc, float centerOffsetX, float centerOffsetY, float objectRadius,
 			float objectDiameter) {
-
-		gc.setStroke(Color.BLACK);
 
 		float X1 = centerOffsetX;
 		float X2 = centerOffsetX + objectRadius;
@@ -55,7 +55,7 @@ public enum Shape {
 		float Y2 = centerOffsetY + objectRadius;
 		float Y3 = centerOffsetY + objectRadius;
 
-		gc.strokePolygon(new double[] { X1, X2, X3 }, new double[] { Y1, Y2, Y3 }, 3);
+		gc.fillPolygon(new double[] { X1, X2, X3 }, new double[] { Y1, Y2, Y3 }, 3);
 
 	}
 }

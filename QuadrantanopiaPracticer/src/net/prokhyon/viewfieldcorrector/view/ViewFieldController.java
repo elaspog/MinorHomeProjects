@@ -1,6 +1,10 @@
 package net.prokhyon.viewfieldcorrector.view;
 
+import java.util.Random;
+
+import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
@@ -13,11 +17,21 @@ public class ViewFieldController {
 
 	private ViewFieldSettings viewFieldSettings;
 
+	Random random = new Random();
+
 	@FXML
 	private StackPane pane;
 
 	@FXML
 	private Canvas regularCanvas;
+
+	private Shape shape = Shape.values()[random.nextInt(Shape.values().length)];
+
+	private String shapeColorCode;
+
+	private final FloatProperty objectActualPositionX = new SimpleFloatProperty();
+
+	private final FloatProperty objectActualPositionY = new SimpleFloatProperty();
 
 	private float width;
 
@@ -36,6 +50,30 @@ public class ViewFieldController {
 	private float objectSizeFactor;
 
 	private float axisSizeFactor;
+
+	public float getObjectActualPositionX() {
+		return objectActualPositionX.get();
+	}
+
+	public void setObjectActualPositionX(float objectActualPositionX) {
+		this.objectActualPositionX.set(objectActualPositionX);
+	}
+
+	public FloatProperty objectActualPositionXProperty() {
+		return objectActualPositionX;
+	}
+
+	public float getObjectActualPositionY() {
+		return objectActualPositionY.get();
+	}
+
+	public void setObjectActualPositionY(float objectActualPositionY) {
+		this.objectActualPositionY.set(objectActualPositionY);
+	}
+
+	public FloatProperty objectActualPositionYProperty() {
+		return objectActualPositionY;
+	}
 
 	@FXML
 	private void initialize() {
@@ -71,12 +109,17 @@ public class ViewFieldController {
 		viewFieldSettings.centerAxisOffsetYProperty().addListener(listener);
 		viewFieldSettings.obectStartingPositionXProperty().addListener(listener);
 		viewFieldSettings.obectStartingPositionYProperty().addListener(listener);
-		viewFieldSettings.objectStartingRadiusProperty().addListener(listener);
+		viewFieldSettings.objectStartingDiameterProperty().addListener(listener);
 
 		viewFieldSettings.activeBackgroundColorProperty().addListener(listener);
 		viewFieldSettings.passiveBackgroundColorProperty().addListener(listener);
 		viewFieldSettings.axisColorProperty().addListener(listener);
 		viewFieldSettings.startingFieldColorProperty().addListener(listener);
+
+		objectActualPositionXProperty().addListener(listener);
+		objectActualPositionYProperty().addListener(listener);
+
+		generateNewObject();
 	}
 
 	private void draw(GraphicsContext gc) {
@@ -85,17 +128,9 @@ public class ViewFieldController {
 		drawStartingArea(gc);
 		drawAxis(gc);
 
-		float objectOffsetX = width * viewFieldSettings.getObectStartingPositionX() / 100.0f;
-		float objectOffsetY = height * viewFieldSettings.getObectStartingPositionY() / 100.0f;
+		shape.draw(gc, centerPointX + objectActualPositionX.getValue(), centerPointY + objectActualPositionY.getValue(),
+				objectRadius, objectDiameter, shapeColorCode);
 
-		Shape s1 = Shape.CIRCLE;
-		s1.draw(gc, centerPointX + objectOffsetX, centerPointY + objectOffsetY, objectRadius, objectDiameter);
-
-		Shape s2 = Shape.SQUARE;
-		s2.draw(gc, centerPointX + objectOffsetX, centerPointY + objectOffsetY, objectRadius, objectDiameter);
-
-		Shape s3 = Shape.TRIANGLE;
-		s3.draw(gc, centerPointX + objectOffsetX, centerPointY + objectOffsetY, objectRadius, objectDiameter);
 	}
 
 	private void clearArea(GraphicsContext gc) {
@@ -130,11 +165,52 @@ public class ViewFieldController {
 
 		float dx = width * viewFieldSettings.getObectStartingPositionX() / 100.0f;
 		float dy = height * viewFieldSettings.getObectStartingPositionY() / 100.0f;
-		float dw = screenSizeMin * viewFieldSettings.getObjectStartingRadius() / 100.0f;
-		float dh = screenSizeMin * viewFieldSettings.getObjectStartingRadius() / 100.0f;
+		float dw = screenSizeMin * viewFieldSettings.getObjectStartingDiameter() / 100.0f;
+		float dh = screenSizeMin * viewFieldSettings.getObjectStartingDiameter() / 100.0f;
 
 		gc.setFill(viewFieldSettings.getStartingFieldColor());
 		gc.fillOval(centerPointX + dx - dw / 2.0, centerPointY + dy - dh / 2.0, dw, dh);
+	}
+
+	public void generateNewObject() {
+
+		generateNewColor();
+		generateNextShape();
+		generateNewCoordinates();
+	}
+
+	private void generateNewColor() {
+
+		shapeColorCode = viewFieldSettings.getObjectColorCodes()
+				.get(random.nextInt(viewFieldSettings.getObjectColorCodes().size()));
+	}
+
+	private void generateNextShape() {
+
+		shape = Shape.values()[random.nextInt(Shape.values().length)];
+	}
+
+	private void generateNewCoordinates() {
+
+		float spX = width * viewFieldSettings.getObectStartingPositionX() / 100.0f;
+		float spY = height * viewFieldSettings.getObectStartingPositionY() / 100.0f;
+		float r = screenSizeMin * viewFieldSettings.getObjectStartingDiameter() / 200.0f;
+
+		while (true) {
+
+			float genXfloat = random.nextFloat() * 2;
+			float genYfloat = random.nextFloat() * 2;
+			float generatedX = spX + genXfloat * r - r;
+			float generatedY = spY + genYfloat * r - r;
+
+			double dist = Math.sqrt((spX - generatedX) * (spX - generatedX) + (spY - generatedY) * (spY - generatedY));
+
+			if (dist <= r) {
+				objectActualPositionX.set(generatedX);
+				objectActualPositionY.set(generatedY);
+				break;
+			}
+		}
 	}
 
 	private void refreshValues() {
@@ -149,5 +225,4 @@ public class ViewFieldController {
 		objectDiameter = objectSizeFactor * screenSizeMin;
 		objectRadius = (float) (objectDiameter / 2.0);
 	}
-
 }

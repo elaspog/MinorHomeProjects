@@ -9,6 +9,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import net.prokhyon.viewfieldcorrector.MainApp;
+import net.prokhyon.viewfieldcorrector.model.ViewFieldSettings;
 
 public class SettingsOverviewController {
 
@@ -28,7 +29,7 @@ public class SettingsOverviewController {
 	private Spinner<Integer> objectSize;
 
 	@FXML
-	private Spinner<Integer> objectStartingRadius;
+	private Spinner<Integer> objectStartingDiameter;
 
 	@FXML
 	private Spinner<Integer> axisSize;
@@ -55,6 +56,8 @@ public class SettingsOverviewController {
 	private ComboBox<String> objectColors;
 
 	private MainApp mainApp;
+
+	private ViewFieldSettings viewFieldSettings;
 
 	public SettingsOverviewController() {
 	}
@@ -86,6 +89,7 @@ public class SettingsOverviewController {
 
 	public void setMainApp(MainApp mainApp) {
 		this.mainApp = mainApp;
+		this.viewFieldSettings = mainApp.getViewFieldSettings();
 	}
 
 	public boolean isReady() {
@@ -102,18 +106,18 @@ public class SettingsOverviewController {
 	@FXML
 	private void handleOpenAnimation() {
 
-		mainApp.getViewFieldSettings().objectSizeProperty().bind(objectSize.valueProperty());
-		mainApp.getViewFieldSettings().axisSizeProperty().bind(axisSize.valueProperty());
-		mainApp.getViewFieldSettings().centerAxisOffsetXProperty().bind(centerAxisOffsetX.valueProperty());
-		mainApp.getViewFieldSettings().centerAxisOffsetYProperty().bind(centerAxisOffsetY.valueProperty());
-		mainApp.getViewFieldSettings().obectStartingPositionXProperty().bind(obectStartingPositionX.valueProperty());
-		mainApp.getViewFieldSettings().obectStartingPositionYProperty().bind(obectStartingPositionY.valueProperty());
-		mainApp.getViewFieldSettings().objectStartingRadiusProperty().bind(objectStartingRadius.valueProperty());
+		viewFieldSettings.objectSizeProperty().bind(objectSize.valueProperty());
+		viewFieldSettings.axisSizeProperty().bind(axisSize.valueProperty());
+		viewFieldSettings.centerAxisOffsetXProperty().bind(centerAxisOffsetX.valueProperty());
+		viewFieldSettings.centerAxisOffsetYProperty().bind(centerAxisOffsetY.valueProperty());
+		viewFieldSettings.obectStartingPositionXProperty().bind(obectStartingPositionX.valueProperty());
+		viewFieldSettings.obectStartingPositionYProperty().bind(obectStartingPositionY.valueProperty());
+		viewFieldSettings.objectStartingDiameterProperty().bind(objectStartingDiameter.valueProperty());
 
-		mainApp.getViewFieldSettings().activeBackgroundColorProperty().bind(activeBackgroundColor.valueProperty());
-		mainApp.getViewFieldSettings().passiveBackgroundColorProperty().bind(passiveBackgroundColor.valueProperty());
-		mainApp.getViewFieldSettings().axisColorProperty().bind(axisColor.valueProperty());
-		mainApp.getViewFieldSettings().startingFieldColorProperty().bind(startingFieldColor.valueProperty());
+		viewFieldSettings.activeBackgroundColorProperty().bind(activeBackgroundColor.valueProperty());
+		viewFieldSettings.passiveBackgroundColorProperty().bind(passiveBackgroundColor.valueProperty());
+		viewFieldSettings.axisColorProperty().bind(axisColor.valueProperty());
+		viewFieldSettings.startingFieldColorProperty().bind(startingFieldColor.valueProperty());
 
 		mainApp.showViewField();
 	}
@@ -121,6 +125,7 @@ public class SettingsOverviewController {
 	@FXML
 	private void handleStartAnimation() {
 
+		mainApp.startAnimation();
 	}
 
 	@FXML
@@ -136,6 +141,7 @@ public class SettingsOverviewController {
 
 		if (!objectColors.getItems().contains(suggestedColorCode)) {
 			objectColors.getItems().add(suggestedColorCode);
+			viewFieldSettings.getObjectColorCodes().add(suggestedColorCode);
 		}
 	}
 
@@ -144,6 +150,6 @@ public class SettingsOverviewController {
 
 		String codeToRemove = objectColors.getValue();
 		objectColors.getItems().remove(codeToRemove);
-
+		viewFieldSettings.getObjectColorCodes().remove(codeToRemove);
 	}
 }
