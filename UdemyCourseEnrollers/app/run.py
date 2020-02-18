@@ -16,9 +16,6 @@ bc = BrowserController(cfg.browser['mode'], cfg.browser['window_size'])
 # Initialize user reaction time simulation
 utg = UserTimeGenerator()
 
-# Read existing scraping information
-database_df = dm.read_database()
-
 
 def read_current_courses_from_site(page_count):
 
@@ -37,20 +34,18 @@ def read_current_courses_from_site(page_count):
     return scraped_course_info_df
 
 
-def process_coupons(to_process_df):
+def process_coupons(courses_df):
+
+    col_name_status = cfg.course_status_database_file["csv_column_names"][0]
+
+    # Select rows where 'status'='todo' and 'courses_w_coupons' has non null value
+    to_process_df = courses_df[ (courses_df[["courses_w_coupons"]].notnull().any(axis=1)) & (courses_df[col_name_status] == 'todo') ]
 
     for _, row in to_process_df.iterrows():
         bc.navigate(row["courses_w_coupons"])
 
 
-if __name__== "__main__":
-
-    # Read paging information
-    bc.navigate(cfg.site['freebiesglobal']['udemy_collections']['url_first_page'])
-    page_count = bc.find(xpath=cfg.site['freebiesglobal']['page_count']).read_attribute("text")
-
-    # Read all courses frou coupon site
-    scraped_course_info_df = read_current_courses_from_site(int(page_count))
+def join_database_with_currently_scraped(database_df, scraped_df):
 
     col_name_status = cfg.course_status_database_file["csv_column_names"][0]
     col_name_course = cfg.course_status_database_file["csv_column_names"][1]
@@ -60,11 +55,32 @@ if __name__== "__main__":
     courses_df = pd.merge(database_df, scraped_course_info_df, left_on=[col_name_course], right_on=[col_name_course], how="outer")
     courses_df[[col_name_status]] = courses_df[[col_name_status]].fillna(stat_to_process)
 
-    # Select rows where 'status'='todo' and 'courses_w_coupons' has non null value
-    to_process_df = courses_df[ (courses_df[["courses_w_coupons"]].notnull().any(axis=1)) & (courses_df[col_name_status] == 'todo') ]
+    return courses_df
+
+
+if __name__== "__main__":
+
+    # Read existing scraping information
+    database_df = dm.read_database()
+
+    print(database_df)
+
+    # Read paging information
+    bc.navigate(cfg.site['freebiesglobal']['udemy_collections']['url_first_page'])
+    page_count = bc.find(xpath=cfg.site['freebiesglobal']['page_count']).read_attribute("text")
+
+    print("page_count: ", page_count)
+
+    # Read all courses from coupon site
+    scraped_course_info_df = read_current_courses_from_site(int(page_count))
+
+    # Join currently scraped information with already stored
+    joined_courses_df = join_database_with_currently_scraped(database_df, scraped_course_info_df)
 
     # Process coupons found
-    process_coupons(to_process_df)
+    process_coupons(joined_courses_df)
+
+    print(joined_courses_df)
 
     # Write results to database file
-    dm.write_database(courses_df[["status", "course_url"]])
+    dm.write_database(joined_courses_df[["status", "course_url"]])
