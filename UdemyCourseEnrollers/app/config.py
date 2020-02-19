@@ -8,7 +8,8 @@ course_status_database_file = {
 
 browser = {
     'window_size': '--window-size=1920x1080',
-    'mode': '--headless'
+    'mode': '--headless',
+    'privacy': '--incognito'
 }
 
 user_reaction_simulation = {
@@ -18,6 +19,10 @@ user_reaction_simulation = {
 
 site = {
     'udemy' : {
+        'url_first_page': 'https://www.udemy.com/join/login-popup/',
+        'input_email' : '//input[@id="email--1"]',
+        'input_passwd': '//input[@id="id_password"]',
+        'authenticate_button' : '//input[@id="submit-id-submit"]',
         'enroll_button' : '//button[text()="Enroll now"]'
     },
     'freebiesglobal': {
@@ -32,7 +37,7 @@ site = {
         'udemy_collections': {
             'url_first_page': 'https://freebiesglobal.com/dealstore/udemy',
             'url_template': 'https://freebiesglobal.com/dealstore/udemy/page/%s',
-            'xpath_articles': '/html/body/div[2]/div[2]/div/div[3]/article/div[1]/div[2]/article/div[1]/div/div[2]/div/span/a'
+            'xpath_articles': '//a[starts-with(@href, "https://www.udemy.com/")]'
         }
     }
 }

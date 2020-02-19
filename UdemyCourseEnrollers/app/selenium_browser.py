@@ -1,6 +1,8 @@
 
 import time
 
+from user_time_simulator import UserTimeGenerator
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -9,9 +11,14 @@ from selenium.webdriver.chrome.options import Options
 
 class BrowserController(object):
 
+
     def __init__(self, *arguments):
         self.arguments = [str(arg) for arg in arguments]
         self.browser_options, self.browser = self._initialize_selenium_browser()
+
+        # Initialize user reaction time simulation
+        self.utg = UserTimeGenerator()
+
 
     def _initialize_selenium_browser(self):
 
@@ -35,7 +42,10 @@ class BrowserController(object):
         print("Driver settings: " + ", ".join(self.arguments))
 
 
-    def wait(self, seconds):
+    def wait(self, seconds=None):
+
+        if not seconds:
+            seconds = self.utg.generate_user_wait_time()
 
         time.sleep(seconds)
         return self
@@ -52,7 +62,7 @@ class BrowserController(object):
 
     def find(self, multi=False, xpath=None, tag=None):
 
-        if not xpath and not tag:
+        if not xpath and not tag and not id:
             raise "No valid argument passed"
 
         if xpath and not isinstance(xpath, str):
@@ -69,6 +79,32 @@ class BrowserController(object):
 
         if tag:
             self._state_val = self.browser.find_elements_by_tag_name(tag)
+
+        return self
+
+
+    def click(self):
+
+        if self._state_val:
+            self._state_val.click()
+
+        return self
+
+
+    def enter(self, string_value):
+
+        if self._state_val:
+            self._state_val.send_keys(string_value)
+
+        return self
+
+
+    def human_type(self, string_value):
+
+        if self._state_val:
+            for s in string_value:
+                self.wait(UserTimeGenerator.Between(0.1, 0.3))
+                self._state_val.send_keys(s)
 
         return self
 

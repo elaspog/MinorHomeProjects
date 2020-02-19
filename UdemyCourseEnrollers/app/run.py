@@ -6,15 +6,13 @@ import pandas as pd
 
 import config as cfg
 from selenium_browser import BrowserController
-from user_time_simulator import UserTimeGenerator
 import downloaded_courses_manager as dm
 
 
 # Initialize Navigator
-bc = BrowserController(cfg.browser['mode'], cfg.browser['window_size'])
-
-# Initialize user reaction time simulation
-utg = UserTimeGenerator()
+#bc = BrowserController( cfg.browser['window_size'])
+bc = BrowserController( cfg.browser['privacy'], cfg.browser['window_size'])
+#bc = BrowserController(cfg.browser['mode'], cfg.browser['privacy'], cfg.browser['window_size'])
 
 
 def read_current_courses_from_site(page_count):
@@ -26,12 +24,26 @@ def read_current_courses_from_site(page_count):
         url = cfg.site['freebiesglobal']['udemy_collections']['url_template'] % str(i)
         bc.wait(0.1)
         bc.navigate(url)
-        course_urls_with_coupons = course_urls_with_coupons + [x.get_attribute("href") for x in bc.find(multi=True, xpath=articles_xpath).state]
+        page_courses = [x.get_attribute("href") for x in bc.find(multi=True, xpath=articles_xpath).state]
+        course_urls_with_coupons = course_urls_with_coupons + page_courses
 
     scraped_course_info_df = pd.DataFrame(course_urls_with_coupons, columns = ["courses_w_coupons"])
     scraped_course_info_df["course_url"] = scraped_course_info_df.apply(lambda x: x['courses_w_coupons'].split("?")[0], axis=1)
 
     return scraped_course_info_df
+
+
+def log_in_udemy():
+
+    bc \
+        .navigate(cfg.site['udemy']['url_first_page']) \
+        .wait(5) \
+        .find(xpath=cfg.site['udemy']['input_email']) \
+        .human_type("username") \
+        .find(xpath=cfg.site['udemy']['input_passwd']) \
+        .human_type("password") \
+        .find(xpath=cfg.site['udemy']['authenticate_button']) \
+        .click()
 
 
 def process_coupons(courses_df):
@@ -60,16 +72,15 @@ def join_database_with_currently_scraped(database_df, scraped_df):
 
 if __name__== "__main__":
 
+    # Udemy login
+    log_in_udemy()
+
     # Read existing scraping information
     database_df = dm.read_database()
-
-    print(database_df)
 
     # Read paging information
     bc.navigate(cfg.site['freebiesglobal']['udemy_collections']['url_first_page'])
     page_count = bc.find(xpath=cfg.site['freebiesglobal']['page_count']).read_attribute("text")
-
-    print("page_count: ", page_count)
 
     # Read all courses from coupon site
     scraped_course_info_df = read_current_courses_from_site(int(page_count))
@@ -79,8 +90,6 @@ if __name__== "__main__":
 
     # Process coupons found
     process_coupons(joined_courses_df)
-
-    print(joined_courses_df)
 
     # Write results to database file
     dm.write_database(joined_courses_df[["status", "course_url"]])
