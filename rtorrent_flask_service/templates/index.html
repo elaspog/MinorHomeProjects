@@ -1,0 +1,28 @@
+<!doctype html>
+
+<head>
+  <title>rTorrent Uploader</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<h1>rTorrent Uploader</h1>
+
+<body>
+
+  <div class="main">
+    <form method="POST" action="/" enctype = "multipart/form-data">
+      Torrent file:<br>
+      <input type="file" name="file" ><br>
+      <button type="submit">Upload</button>
+    </form>
+  </div>
+
+  <br>
+
+  <div class="main">
+    {% if file %}
+      <p>Your file is {{ file }}</p>
+    {% endif %}
+  </div>
+
+</body>
